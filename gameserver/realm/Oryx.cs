@@ -12,6 +12,7 @@ using gameserver.realm.mapsetpiece;
 using gameserver.realm.world;
 using common.config;
 using gameserver.realm.terrain;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -243,7 +244,7 @@ namespace gameserver.realm
             {
                 foreach (var i in world.Players.Values)
                 {
-                    if (ocWorld == null) i.Client.Disconnect();
+                    if (ocWorld == null) i.Client.Disconnect(DisconnectReason.RECONNECT_TO_CASTLE);
                     i.Client.SendMessage(new RECONNECT
                     {
                         Host = "",

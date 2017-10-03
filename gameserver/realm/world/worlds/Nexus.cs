@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using gameserver.realm.entity;
 using gameserver.realm.entity.player;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -49,8 +50,8 @@ namespace gameserver.realm.world
                         {
                             if (y.Value.AccountId == z.Value.AccountId && y.Value != z.Value)
                             {
-                                y.Value.Client.Disconnect();
-                                z.Value.Client.Disconnect();
+                                y.Value.Client.Disconnect(DisconnectReason.DUPER_DISCONNECT);
+                                z.Value.Client.Disconnect(DisconnectReason.DUPER_DISCONNECT);
                             }
                         }
                     }

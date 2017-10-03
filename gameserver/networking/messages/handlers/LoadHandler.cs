@@ -5,6 +5,7 @@ using gameserver.networking.outgoing;
 using gameserver.realm.entity.player;
 using FAILURE = gameserver.networking.outgoing.FAILURE;
 using gameserver.realm;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -26,7 +27,7 @@ namespace gameserver.networking.handlers
                         ErrorId = 0,
                         ErrorDescription = "Character is dead."
                     });
-                    client.Disconnect();
+                    client.Disconnect(DisconnectReason.CHARACTER_IS_DEAD);
                 }
                 else
                 {
@@ -48,7 +49,7 @@ namespace gameserver.networking.handlers
                     ErrorId = 0,
                     ErrorDescription = "Failed to Load character."
                 });
-                client.Disconnect();
+                client.Disconnect(DisconnectReason.FAILED_TO_LOAD_CHARACTER);
             }
         }
     }

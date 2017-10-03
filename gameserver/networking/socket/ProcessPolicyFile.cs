@@ -1,6 +1,7 @@
 ﻿using common;
 using common.config;
 using System.Net.Sockets;
+using static gameserver.networking.Client;
 
 namespace gameserver.networking
 {
@@ -13,7 +14,7 @@ namespace gameserver.networking
             wtr.WriteNullTerminatedString(Settings.IS_PRODUCTION ? Settings.NETWORKING.INTERNAL.SELECTED_DOMAINS : Settings.NETWORKING.INTERNAL.LOCALHOST_DOMAINS);
             wtr.Write((byte) '\r');
             wtr.Write((byte) '\n');
-            parent.Disconnect();
+            parent.Disconnect(DisconnectReason.PROCESS_POLICY_FILE);
         }
     }
 }

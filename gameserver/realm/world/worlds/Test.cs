@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using gameserver.realm.entity.player;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -34,7 +35,7 @@ namespace gameserver.realm.world
                 if (i.Value.Client.Account.AccType != common.config.AccountType.ULTIMATE_ACCOUNT || !i.Value.Client.Account.Admin)
                 {
                     i.Value.SendError(string.Format("[Admin: {0}] You cannot access Test world with rank {1}.", i.Value.Client.Account.Admin ? "true" : "false", i.Value.Client.Account.Rank));
-                    i.Value.Client.Disconnect();
+                    i.Value.Client.Disconnect(DisconnectReason.ACCESS_DENIED);
                 }
             }
         }

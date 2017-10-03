@@ -147,22 +147,22 @@ namespace gameserver.realm.entity.player
 			foreach (var i in sendEntities)
 				lastUpdate[i] = i.UpdateCount;
 
-			var newStatics = GetNewStatics(xBase, yBase).ToArray();
-			var removeStatics = GetRemovedStatics(xBase, yBase).ToArray();
-			var removedIds = new List<int>();
+			IEnumerable<ObjectDef> newStatics = GetNewStatics(xBase, yBase);
+			IEnumerable<IntPoint> removeStatics = GetRemovedStatics(xBase, yBase);
+			List<int> removedIds = new List<int>();
             if (!world.Dungeon)
-                foreach (IntPoint i in removeStatics)
+                foreach (IntPoint i in removeStatics.ToArray())
                 {
                     removedIds.Add(Owner.Map[i.X, i.Y].ObjId);
                     clientStatic.Remove(i);
                 }
 
-			if (sendEntities.Count <= 0 && list.Count <= 0 && dropEntities.Length <= 0 && newStatics.Length <= 0 &&
+			if (sendEntities.Count <= 0 && list.Count <= 0 && dropEntities.Length <= 0 && newStatics.ToArray().Length <= 0 &&
 				removedIds.Count <= 0) return;
 			var packet = new UPDATE()
 			{
 				Tiles = list.ToArray(),
-				NewObjects = sendEntities.Select(_ => _.ToDefinition()).Concat(newStatics).ToArray(),
+				NewObjects = sendEntities.Select(_ => _.ToDefinition()).Concat(newStatics.ToArray()).ToArray(),
 				RemovedObjectIds = dropEntities.Concat(removedIds).ToArray()
 			};
 			Client.SendMessage(packet);

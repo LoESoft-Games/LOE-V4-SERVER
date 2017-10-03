@@ -21,9 +21,47 @@ namespace gameserver.networking
             Console.ResetColor();
         }
 
-        public void _(string accId, Socket skt)
+        public enum DisconnectReason:byte
         {
-            string response = $"[{time[1]}] [{nameof(Client)}] Disconnect\t->\tplayer id {accId} to {skt.RemoteEndPoint.ToString().Split(':')[0]}";
+            FAILED_TO_LOAD_CHARACTER = 1,
+            OUTDATED_CLIENT = 2,
+            OUTDATED_INTERNAL_CLIENT = 3,
+            DISABLE_GUEST_ACCOUNT = 4,
+            BAD_LOGIN = 5,
+            SERVER_FULL = 6,
+            ACCOUNT_BANNED = 7,
+            INVALID_DISCONNECT_KEY = 8,
+            LOST_CONNECTION = 9,
+            ACCOUNT_IN_USE = 10,
+            INVALID_WORLD = 11,
+            INVALID_PORTAL_KEY = 12,
+            PORTAL_KEY_EXPIRED = 13,
+            CHARACTER_IS_DEAD = 14,
+            HP_POTION_CHEAT_ENGINE = 15,
+            MP_POTION_CHEAT_ENGINE = 16,
+            STOPPING_SERVER = 17,
+            SOCKET_IS_NOT_CONNECTED = 18,
+            RECEIVING_HDR = 19,
+            RECEIVING_BODY = 20,
+            ERROR_WHEN_HANDLING_PACKET = 21,
+            SOCKET_ERROR_DETECTED = 22,
+            PROCESS_POLICY_FILE = 23,
+            RESTART = 24,
+            PLAYER_KICK = 25,
+            PLAYER_BANNED = 26,
+            CHARACTER_IS_DEAD_ERROR = 27,
+            CHEAT_ENGINE_DETECTED = 28,
+            RECONNECT_TO_CASTLE = 29,
+            REALM_MANAGER_DISCONNECT = 30,
+            STOPPING_REALM_MANAGER = 31,
+            DUPER_DISCONNECT = 32,
+            ACCESS_DENIED = 33,
+            UNKNOW_ERROR_INSTANCE = 255
+        }
+
+        public void _(string accId, Socket skt, DisconnectReason type)
+        {
+            string response = $"[{time[1]}] [{nameof(Client)}] [({(int) type}) {type.ToString()}] Disconnect\t->\tplayer id {accId} to {skt.RemoteEndPoint.ToString().Split(':')[0]}";
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(response);
             Console.ResetColor();
@@ -53,7 +91,7 @@ namespace gameserver.networking
 
                 await task;
 
-                Disconnect();
+                Disconnect(DisconnectReason.LOST_CONNECTION);
                 return;
             }
 
@@ -95,7 +133,7 @@ namespace gameserver.networking
             Manager.Disconnect(this);
         }
 
-        public async void Disconnect()
+        public async void Disconnect(DisconnectReason type)
         {
             try
             {
@@ -112,7 +150,7 @@ namespace gameserver.networking
                 if (Account == null)
                     return;
 
-                _(Account.AccountId, Socket);
+                _(Account.AccountId, Socket, type);
                 
                 State = ProtocolState.Disconnected;
 

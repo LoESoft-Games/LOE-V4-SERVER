@@ -81,6 +81,8 @@ namespace common
 
             assign = new AutoAssign(this);
 
+            addition = new XElement("Additions");
+
             string basePath = Path.Combine(AssemblyDirectory, path);
             string[] xmls = Directory.EnumerateFiles(basePath, "*.xml", SearchOption.AllDirectories).ToArray();
             try
@@ -102,13 +104,14 @@ namespace common
                 return;
 
             _(path, xmls.Length);
-            _("items", items.Count);
-            _("tiles", tiles.Count);
-            _("objects", objDescs.Count);
-            _("portals", portals.Count);
-            _("pets", type2pet.Count);
-            _("pet skins", id2pet_skin.Count);
-            _("special themed items", setTypeSkins.Count);
+            _($"addition{(addition.Elements().Count() > 1 ? "s" : "")}", addition.Elements().Count());
+            _($"item{(items.Count > 1 ? "s" : "")}", items.Count);
+            _($"tile{(tiles.Count > 1 ? "s" : "")}", tiles.Count);
+            _($"object{(objDescs.Count > 1 ? "s" : "")}", objDescs.Count);
+            _($"portal{(portals.Count > 1 ? "s" : "")}", portals.Count);
+            _($"pet{(type2pet.Count > 1 ? "s" : "")}", type2pet.Count);
+            _($"pet skin{(id2pet_skin.Count > 1 ? "s" : "")}", id2pet_skin.Count);
+            _($"special themed item{(setTypeSkins.Count > 1 ? "s" : "")}", setTypeSkins.Count);
         }
 
         private static string AssemblyDirectory

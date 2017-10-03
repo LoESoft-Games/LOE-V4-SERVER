@@ -10,6 +10,7 @@ using gameserver.realm.world;
 using FAILURE = gameserver.networking.outgoing.FAILURE;
 using System;
 using gameserver.networking.error;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -21,7 +22,7 @@ namespace gameserver.networking.handlers
 
         protected override void HandlePacket(Client client, HELLO packet)
         {
-            if (Client.SERVER_VERSION != packet.BuildVersion)
+            if (SERVER_VERSION != packet.BuildVersion)
             {
                 client.SendMessage(new FAILURE
                 {
@@ -31,13 +32,13 @@ namespace gameserver.networking.handlers
                             FormatedJSONError(
                                 errorID: ErrorIDs.OUTDATED_CLIENT,
                                 labels: new[] { "{CLIENT_BUILD_VERSION}", "{SERVER_BUILD_VERSION}" },
-                                arguments: new [] { packet.BuildVersion, Client.SERVER_VERSION }
+                                arguments: new [] { packet.BuildVersion, SERVER_VERSION }
                             )
                 });
-                client.Disconnect();
+                client.Disconnect(DisconnectReason.OUTDATED_CLIENT);
                 return;
             }
-            if (!Client.INTERNAL_SERVER_BUILD.Contains(packet.InternalBuildVersion)) //support for multi internal server build versions
+            if (!INTERNAL_SERVER_BUILD.Contains(packet.InternalBuildVersion)) //support for multi internal server build versions
             {
                 client.SendMessage(new FAILURE
                 {
@@ -50,7 +51,7 @@ namespace gameserver.networking.handlers
                                 arguments: null
                             )
                 });
-                client.Disconnect();
+                client.Disconnect(DisconnectReason.OUTDATED_INTERNAL_CLIENT);
                 return;
             }
             DbAccount acc;
@@ -69,7 +70,7 @@ namespace gameserver.networking.handlers
                                 arguments: null
                             )
                 });
-                client.Disconnect();
+                client.Disconnect(DisconnectReason.DISABLE_GUEST_ACCOUNT);
                 return;
             }
             else if (s1 == LoginStatus.InvalidCredentials)
@@ -79,7 +80,7 @@ namespace gameserver.networking.handlers
                     ErrorId = 0,
                     ErrorDescription = "Bad login."
                 });
-                client.Disconnect();
+                client.Disconnect(DisconnectReason.BAD_LOGIN);
             }
             client.ConnectedBuild = packet.BuildVersion;
             Tuple<bool, ErrorIDs> TryConnect =  client.Manager.TryConnect(client);
@@ -89,26 +90,42 @@ namespace gameserver.networking.handlers
                 ErrorIDs errorID = TryConnect.Item2;
                 string[] labels;
                 string[] arguments;
+                DisconnectReason type;
                 switch(TryConnect.Item2)
                 {
                     case ErrorIDs.SERVER_FULL:
                         {
                             labels = new[] { "{MAX_USAGE}" };
                             arguments = new[] { $"{client.Manager.MaxClients}" };
+                            type = DisconnectReason.SERVER_FULL;
                         }
                         break;
                     case ErrorIDs.ACCOUNT_BANNED:
+                        {
+                            labels = new[] { "{CLIENT_NAME}" };
+                            arguments = new[] { client.Account.Name };
+                            type = DisconnectReason.ACCOUNT_BANNED;
+                        }
+                        break;
                     case ErrorIDs.INVALID_DISCONNECT_KEY:
+                        {
+                            labels = new[] { "{CLIENT_NAME}" };
+                            arguments = new[] { client.Account.Name };
+                            type = DisconnectReason.INVALID_DISCONNECT_KEY;
+                        }
+                        break;
                     case ErrorIDs.LOST_CONNECTION:
                         {
                             labels = new[] { "{CLIENT_NAME}" };
                             arguments = new[] { client.Account.Name };
+                            type = DisconnectReason.LOST_CONNECTION;
                         }
                         break;
                     default:
                         {
                             labels = new[] { "{UNKNOW_ERROR_INSTANCE}" };
                             arguments = new[] { "connection aborted by unexpected protocol at line <b>340</b> or line <b>346</b> from 'TryConnect' function in RealmManager for security reasons" };
+                            type = DisconnectReason.UNKNOW_ERROR_INSTANCE;
                         }
                         break;
                 }
@@ -123,7 +140,7 @@ namespace gameserver.networking.handlers
                                 arguments: arguments
                             )
                 });
-                client.Disconnect();
+                client.Disconnect(type);
                 return;
             }
             else
@@ -137,7 +154,7 @@ namespace gameserver.networking.handlers
                 {
                     //SendFailure(client, "Account in Use (" +
                     //    client.Manager.Database.GetLockTime(acc) + " seconds until timeout)");
-                    client.Disconnect();
+                    client.Disconnect(DisconnectReason.ACCOUNT_IN_USE);
                     return;
                 }
                 if (world == null)
@@ -147,7 +164,7 @@ namespace gameserver.networking.handlers
                         ErrorId = 1,
                         ErrorDescription = "Invalid world."
                     });
-                    client.Disconnect();
+                    client.Disconnect(DisconnectReason.INVALID_WORLD);
                     return;
                 }
                 if (world.NeedsPortalKey)
@@ -159,7 +176,7 @@ namespace gameserver.networking.handlers
                             ErrorId = 1,
                             ErrorDescription = "Invalid Portal Key"
                         });
-                        client.Disconnect();
+                        client.Disconnect(DisconnectReason.INVALID_PORTAL_KEY);
                         return;
                     }
                     if (world.PortalKeyExpired)
@@ -169,7 +186,7 @@ namespace gameserver.networking.handlers
                             ErrorId = 1,
                             ErrorDescription = "Portal key expired."
                         });
-                        client.Disconnect();
+                        client.Disconnect(DisconnectReason.PORTAL_KEY_EXPIRED);
                         return;
                     }
                 }

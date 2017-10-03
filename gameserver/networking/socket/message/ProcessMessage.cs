@@ -1,5 +1,6 @@
 ﻿using gameserver.networking.incoming;
 using gameserver.realm.entity.player;
+using log4net.Core;
 using System;
 using System.Collections.Generic;
 
@@ -14,18 +15,18 @@ namespace gameserver.networking
         {
             try
             {
-                //log.Logger.Log(typeof (Client), Level.Verbose, $"Handling packet '{msg}'...", null);
+                Program.Logger.Logger.Log(typeof (Client), Level.Verbose, $"Handling packet '{msg}'...", null);
                 if (msg.ID == (MessageID) 255) return;
                 IMessage handler;
-                if (!MessageHandler.Handlers.TryGetValue(msg.ID, out handler));
-                    //log.Warn($"Unhandled packet '{msg.ID}'.");
+                if (!MessageHandler.Handlers.TryGetValue(msg.ID, out handler))
+                    Program.Logger.Warn($"Unhandled packet '{msg.ID}'.");
                 else
                     handler.Handle(this, (IncomingMessage) msg);
             }
             catch (Exception e)
             {
-                //log.Error($"Error when handling packet '{msg}'...", e);
-                Disconnect();
+                Program.Logger.Error($"Error when handling packet '{msg}'...", e);
+                Disconnect(DisconnectReason.ERROR_WHEN_HANDLING_PACKET);
             }
         }        
 

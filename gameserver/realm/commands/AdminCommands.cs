@@ -11,6 +11,7 @@ using gameserver.realm.entity.player;
 using gameserver.realm.mapsetpiece;
 using gameserver.realm.world;
 using common.config;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -308,7 +309,7 @@ namespace gameserver.realm.commands
                     if (i.Value.Name.ToLower() == args[0].ToLower().Trim())
                     {
                         player.SendInfo($"Player {i.Value.Name} has been disconnected!");
-                        i.Value.Client.Disconnect();
+                        i.Value.Client.Disconnect(DisconnectReason.PLAYER_KICK);
                     }
                 }
             }
@@ -689,7 +690,7 @@ namespace gameserver.realm.commands
         {
             try
             {
-                MapSetPiece piece = (MapSetPiece)Activator.CreateInstance(Type.GetType(
+                MapSetPiece piece = (MapSetPiece)Activator.CreateInstance(System.Type.GetType(
                     "gameserver.realm.mapsetpieces.setpieces." + args[0], true, true));
                 piece.RenderSetPiece(player.Owner, new IntPoint((int)player.X + 1, (int)player.Y + 1));
                 return true;
@@ -710,8 +711,8 @@ namespace gameserver.realm.commands
         protected override bool Process(Player player, RealmTime time, string[] args)
         {
             Dictionary<string, Command> cmds = new Dictionary<string, Command>();
-            Type t = typeof(Command);
-            foreach (Type i in t.Assembly.GetTypes())
+            System.Type t = typeof(Command);
+            foreach (System.Type i in t.Assembly.GetTypes())
                 if (t.IsAssignableFrom(i) && i != t)
                 {
                     Command instance = (Command)Activator.CreateInstance(i);
@@ -799,7 +800,7 @@ namespace gameserver.realm.commands
                     return false;
                 }
                 p.Client.Manager.Database.BanAccount(p.Client.Account);
-                p.Client.Disconnect();
+                p.Client.Disconnect(DisconnectReason.PLAYER_BANNED);
                 return true;
             }
             catch

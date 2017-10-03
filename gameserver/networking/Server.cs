@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using log4net;
 using gameserver.realm;
 using common.config;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -60,7 +61,7 @@ namespace gameserver.networking
             foreach (Client i in Manager.Clients.Values.ToArray())
             {
                 i.Save();
-                i.Disconnect();
+                i.Disconnect(DisconnectReason.STOPPING_SERVER);
             }
             Socket.Close();
         }

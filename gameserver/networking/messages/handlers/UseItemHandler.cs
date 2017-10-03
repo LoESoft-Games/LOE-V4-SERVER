@@ -6,6 +6,7 @@ using gameserver.realm;
 using gameserver.realm.entity;
 using gameserver.realm.entity.player;
 using System.Collections.Generic;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -37,7 +38,7 @@ namespace gameserver.networking.handlers
                                 if (player.Client.Account.Rank >= 2)
                                     player.SendInfo(string.Format("Cheat engine detected for player {0},\nItem should be a Health Potion, but its {1}.",
                                         client.Player.Name, item.ObjectId));
-                            client.Disconnect();
+                            client.Disconnect(DisconnectReason.HP_POTION_CHEAT_ENGINE);
                             return;
                         }
 
@@ -106,7 +107,7 @@ namespace gameserver.networking.handlers
                                 client.Player.Name, item.ObjectId);
                             foreach (Player player in client.Player.Owner.Players.Values.Where(player => player.Client.Account.Rank >= 2))
                                 player.SendInfo($"Cheat engine detected for player {client.Player.Name},\nItem should be a Magic Potion, but its {item.ObjectId}.");
-                            client.Disconnect();
+                            client.Disconnect(DisconnectReason.MP_POTION_CHEAT_ENGINE);
                             return;
                         }
 

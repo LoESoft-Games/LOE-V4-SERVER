@@ -15,6 +15,7 @@ using gameserver.realm.entity.player;
 using gameserver.realm.world;
 using common.config;
 using gameserver.realm.entity.merchant;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -129,7 +130,7 @@ namespace gameserver.realm
 
         public void Disconnect(Client client)
         {
-            client?.Disconnect();
+            client?.Disconnect(DisconnectReason.REALM_MANAGER_DISCONNECT);
             Clients.TryRemove(client?.Id.ToString(), out client);
             client?.Dispose();
         }
@@ -253,7 +254,7 @@ namespace gameserver.realm
             foreach (Client c in Clients.Values)
             {
                 saveAccountUnlock?.Add(c);
-                c?.Disconnect();
+                c?.Disconnect(DisconnectReason.STOPPING_REALM_MANAGER);
             }
 
             GameData?.Dispose();

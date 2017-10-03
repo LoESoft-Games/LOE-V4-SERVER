@@ -10,6 +10,7 @@ using gameserver.networking.outgoing;
 using System.Xml.Linq;
 using gameserver.realm.terrain;
 using common.config;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -170,7 +171,7 @@ namespace gameserver.realm.entity.player
 
             if (Client.Character.Dead)
             {
-                Client.Disconnect();
+                Client.Disconnect(DisconnectReason.CHARACTER_IS_DEAD);
                 return;
             }
             GenerateGravestone();
@@ -215,11 +216,11 @@ namespace gameserver.realm.entity.player
                         obf0 = -1,
                         obf1 = -1,
                     });
-                    Owner.Timers.Add(new WorldTimer(1000, (w, t) => Client.Disconnect()));
+                    Owner.Timers.Add(new WorldTimer(1000, (w, t) => Client.Disconnect(DisconnectReason.CHARACTER_IS_DEAD)));
                     Owner.LeaveWorld(this);
                 }
                 else
-                    Client.Disconnect();
+                    Client.Disconnect(DisconnectReason.CHARACTER_IS_DEAD_ERROR);
             }
             catch (Exception e)
             {

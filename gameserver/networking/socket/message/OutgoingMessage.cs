@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static gameserver.networking.Client;
 
 namespace gameserver.networking
 {
@@ -14,7 +15,7 @@ namespace gameserver.networking
             {
                 if (!skt.Connected)
                 {
-                    parent.Disconnect();
+                    parent.Disconnect(DisconnectReason.SOCKET_IS_NOT_CONNECTED);
                     return;
                 }
 
@@ -26,7 +27,7 @@ namespace gameserver.networking
                     case OutgoingState.ReceivingHdr:
                         if (e.BytesTransferred < 5)
                         {
-                            parent.Disconnect();
+                            parent.Disconnect(DisconnectReason.RECEIVING_HDR);
                             return;
                         }
                         
@@ -66,7 +67,7 @@ namespace gameserver.networking
                     case OutgoingState.ReceivingBody:
                         if (e.BytesTransferred < (e.UserToken as IncomingToken).Length)
                         {
-                            parent.Disconnect();
+                            parent.Disconnect(DisconnectReason.RECEIVING_BODY);
                             return;
                         }
 

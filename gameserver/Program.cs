@@ -13,6 +13,7 @@ using common.config;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using gameserver.realm.commands.mreyeball;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -175,7 +176,7 @@ namespace gameserver
                     try
                     {
                         foreach (Client clients in manager.Clients.Values)
-                            clients?.Disconnect();
+                            clients?.Disconnect(DisconnectReason.RESTART);
                     } catch (Exception ex)
                     {
                         ForceShutdown(ex);

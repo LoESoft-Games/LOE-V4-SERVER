@@ -7,6 +7,7 @@ using gameserver.networking.outgoing;
 using gameserver.realm.entity.player;
 using gameserver.realm;
 using FAILURE = gameserver.networking.outgoing.FAILURE;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -20,15 +21,14 @@ namespace gameserver.networking.handlers
         {
             int skin = client.Account.OwnedSkins.Contains(packet.SkinType) ? packet.SkinType : 0;
             DbChar character;
-            CreateStatus status = client.Manager.Database.CreateCharacter(
-                client.Manager.GameData, client.Account, (ushort)packet.ClassType, skin, out character);
+            CreateStatus status = client.Manager.Database.CreateCharacter(client.Manager.GameData, client.Account, (ushort)packet.ClassType, skin, out character);
             if (status == CreateStatus.ReachCharLimit)
             {
                 client.SendMessage(new FAILURE
                 {
                     ErrorDescription = "Failed to Load character."
                 });
-                client.Disconnect();
+                client.Disconnect(DisconnectReason.FAILED_TO_LOAD_CHARACTER);
                 return;
             }
             client.Character = character;

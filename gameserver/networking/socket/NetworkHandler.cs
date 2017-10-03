@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Net.Sockets;
 using log4net;
 using common.config;
+using static gameserver.networking.Client;
 
 namespace gameserver.networking
 {
@@ -57,7 +58,7 @@ namespace gameserver.networking
         private void OnError(Exception ex)
         {
             log.Error("Socket error detected: ", ex);
-            parent.Disconnect();
+            parent.Disconnect(DisconnectReason.SOCKET_ERROR_DETECTED);
         }
 
         public void Dispose()

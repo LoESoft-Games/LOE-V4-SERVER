@@ -6,6 +6,7 @@ using System.Linq;
 using gameserver.networking;
 using gameserver.networking.incoming;
 using gameserver.networking.outgoing;
+using static gameserver.networking.Client;
 
 #endregion
 
@@ -203,7 +204,7 @@ namespace gameserver.realm.entity.player
                 if (player?.Client.Account.Rank >= 2)
                     player.SendInfo(string.Format("Cheat engine detected for player {0},\nItem should be {1}, but its {2}.",
                 Name, Inventory[pkt.SlotObject.SlotId].ObjectId, item.ObjectId));
-            Client?.Disconnect();
+            Client?.Disconnect(DisconnectReason.CHEAT_ENGINE_DETECTED);
             return true;
         }
 
